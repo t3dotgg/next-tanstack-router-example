@@ -1,14 +1,13 @@
-import React, { StrictMode } from "react";
-import ReactDOM from "react-dom/client";
 import {
-  Outlet,
-  RouterProvider,
   Link,
+  Outlet,
   ReactRouter,
-  createRouteConfig,
+  RootRoute,
+  Route,
+  RouterProvider,
 } from "@tanstack/react-router";
 
-const rootRoute = createRouteConfig({
+const rootRoute = new RootRoute({
   component: () => (
     <>
       <div>
@@ -20,23 +19,17 @@ const rootRoute = createRouteConfig({
   ),
 });
 
-const indexRoute = rootRoute.createRoute({
+const indexRoute = new Route({
+  getParentRoute: () => rootRoute,
   path: "/",
   component: Index,
 });
 
-const aboutRoute = rootRoute.createRoute({
+const aboutRoute = new Route({
+  getParentRoute: () => rootRoute,
   path: "/about",
   component: About,
 });
-
-const routeConfig = rootRoute.addChildren([indexRoute, aboutRoute]);
-
-const router = new ReactRouter({ routeConfig });
-
-export default function App() {
-  return <RouterProvider router={router} />;
-}
 
 function Index() {
   return (
@@ -50,8 +43,15 @@ function About() {
   return <div>Hello from About!</div>;
 }
 
+const routeTree = rootRoute.addChildren([indexRoute, aboutRoute]);
+
+const router = new ReactRouter({ routeTree });
 declare module "@tanstack/react-router" {
   interface RegisterRouter {
     router: typeof router;
   }
+}
+
+export default function App() {
+  return <RouterProvider router={router} />;
 }
